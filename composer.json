@@ -1,0 +1,14 @@
+{
+  "name": "phonf/phonf",
+  "description": "PHP and JSON oriented micro framework to create web services",
+  "homepage": "http://hugoarribas.es",
+  "authors": [
+    {
+      "name": "Hugo Arribas Rupérez",
+      "email": "hugo.arribas@gmail.com"
+    }
+  ],
+  "autoload": {
+    "psr-4": { "Phonf\\": "src/" }
+  }
+}
