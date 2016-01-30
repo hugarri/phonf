@@ -243,7 +243,7 @@ class SQLSelect {
         if (sizeof($this->whereClauseFields) > 0) {
             foreach ($this->whereClauseFields as $field) {
                 /** @var $field Field */
-                if ($field->getDBValue() == "null") {
+                if ($field->getDBValue() === "null") {
                     $statement .= "`" . $field->getDatabase() . "`.`" . $field->getName() . "` IS " . $field->getDBValue();
                 } else {
                     $statement .= "`" . $field->getDatabase() . "`.`" . $field->getName() . "` = " . $field->getDBValue();
