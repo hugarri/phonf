@@ -21,7 +21,7 @@ class SQLBulkInsert {
     }
 
     /**
-     * @param Array $row
+     * @param array $row
      */
     public function addRow($row) {
         $this->rows[] = $row;
