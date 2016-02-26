@@ -4,11 +4,13 @@ namespace Phonf;
 
 class SQLUpdate {
 
+    private $connection;
     private $tableName;
     private $fields = array();
     private $whereClauseFields = array();
 
-    function __construct($table = null) {
+    function __construct(\mysqli $connection, $table = null) {
+        $this->connection = $connection;
         $this->setTable($table);
     }
 
@@ -61,13 +63,12 @@ class SQLUpdate {
     }
 
     public function execute() {
-        $connection = DAOFactory::getConnection();
-        $statement = $connection->stmt_init();
+        $statement = $this->connection->stmt_init();
         $statement->prepare($this->getQuery());
         $statement->execute();
         $error = $statement->errno;
         $statement->close();
-        $connection->close();
+        $this->connection->close();
 
         return $error;
     }

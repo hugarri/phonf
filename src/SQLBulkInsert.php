@@ -4,10 +4,12 @@ namespace Phonf;
 
 class SQLBulkInsert {
 
+    private $connection;
     private $tableName;
     private $rows = array();
 
-    function __construct($table = null) {
+    function __construct(\mysqli $connection, $table = null) {
+        $this->connection = $connection;
         $this->setTable($table);
     }
 
@@ -58,8 +60,7 @@ class SQLBulkInsert {
     }
 
     public function execute() {
-        $connection = DAOFactory::getConnection();
-        $statement = $connection->stmt_init();
+        $statement = $this->connection->stmt_init();
         $statement->prepare($this->getQuery());
 
         $statement->execute();
@@ -67,12 +68,12 @@ class SQLBulkInsert {
         $error = $statement->errno;
 
         if ($error == 0) {
-            $result = $connection->insert_id;
+            $result = $this->connection->insert_id;
         } else {
             $result = -1;
         }
         $statement->close();
-        $connection->close();
+        $this->connection->close();
 
         return $result;
     }

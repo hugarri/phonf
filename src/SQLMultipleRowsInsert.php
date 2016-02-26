@@ -4,11 +4,13 @@ namespace Phonf;
 
 class SQLMultipleRowsInsert {
 
+    private $connection;
     private $tableName;
     private $fields = array();
     private $rows = array();
 
-    function __construct($table = null) {
+    function __construct(\mysqli $connection, $table = null) {
+        $this->connection = $connection;
         $this->setTable($table);
     }
 
@@ -72,8 +74,7 @@ class SQLMultipleRowsInsert {
     }
 
     public function execute() {
-        $connection = MySQLDAOFactory::getConnection();
-        $statement = $connection->stmt_init();
+        $statement = $this->connection->stmt_init();
         $statement->prepare($this->getQuery());
         $statement->execute();
 
@@ -85,7 +86,7 @@ class SQLMultipleRowsInsert {
             $result = -1;
         }
         $statement->close();
-        $connection->close();
+        $this->connection->close();
 
         return $result;
     }

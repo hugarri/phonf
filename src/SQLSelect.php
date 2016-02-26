@@ -4,6 +4,7 @@ namespace Phonf;
 
 class SQLSelect {
 
+    private $connection;
     private $tableName;
     private $distinct = false;
     private $fields = array();
@@ -23,7 +24,8 @@ class SQLSelect {
     private $limit;
     private $offset = 0;
 
-    function __construct($table = null) {
+    function __construct(\mysqli $connection, $table = null) {
+        $this->connection = $connection;
         $this->setTable($table);
     }
 
@@ -359,16 +361,14 @@ class SQLSelect {
     }
 
     public function execute() {
-        $connection = DAOFactory::getConnection();
-
-        $result = $connection->query($this->getQuery());
+        $result = $this->connection->query($this->getQuery());
 
         $results = array();
         while ($row = $result->fetch_assoc()) {
             $results[] = $row;
         }
 
-        $connection->close();
+        $this->connection->close();
 
         return $results;
     }
