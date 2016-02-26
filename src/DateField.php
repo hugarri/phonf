@@ -9,7 +9,7 @@ class DateField extends Field {
     }
 
     /**
-     * @return DateTime
+     * @return \DateTime
      */
     public function getValue() {
         return $this->value;
@@ -19,10 +19,10 @@ class DateField extends Field {
         if (is_null($this->getValue())) {
             return null;
         }
-        if ($this->getValue() instanceof DateTime) {
+        if ($this->getValue() instanceof \DateTime) {
             $dateTime = $this->getValue();
         } else {
-            $dateTime = new DateTime($this->getValue());
+            $dateTime = new \DateTime($this->getValue());
         }
         return $dateTime->format("d/m/Y");
     }
@@ -31,10 +31,10 @@ class DateField extends Field {
         if (is_null($this->getValue())) {
             return null;
         }
-        if ($this->getValue() instanceof DateTime) {
+        if ($this->getValue() instanceof \DateTime) {
             $dateTime = $this->getValue();
         } else {
-            $dateTime = new DateTime($this->getValue());
+            $dateTime = new \DateTime($this->getValue());
         }
         return $dateTime->format("Y-m-d");
     }
@@ -43,10 +43,10 @@ class DateField extends Field {
         if (is_null($this->getValue())) {
             return null;
         }
-        if ($this->getValue() instanceof DateTime) {
+        if ($this->getValue() instanceof \DateTime) {
             $dateTime = $this->getValue();
         } else {
-            $dateTime = new DateTime($this->getValue());
+            $dateTime = new \DateTime($this->getValue());
         }
         if ($format == "day") {
             $day = $dateTime->format("N");
