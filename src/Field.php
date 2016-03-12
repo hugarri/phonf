@@ -8,9 +8,10 @@ abstract class Field {
     protected $name;
     protected $value;
 
-    function __construct($database, $name) {
+    function __construct($database, $name, $value = null) {
         $this->database = $database;
         $this->name = $name;
+        if (!is_null($value)) $this->setValue($value);
     }
 
     public function getDatabase() {
