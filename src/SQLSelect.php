@@ -18,6 +18,7 @@ class SQLSelect {
     private $whereMoreOrEqualThanClauseFields = array();
     private $whereIsNotNullClauseFields = array();
     private $whereClauseLikeFields = array();
+    private $whereInFields = array();
     private $whereCustomClauses = array();
     private $orderByClauses = array();
     private $bindResult = array();
@@ -131,6 +132,7 @@ class SQLSelect {
             sizeof($this->whereMoreOrEqualThanClauseFields) +
             sizeof($this->whereIsNotNullClauseFields) +
             sizeof($this->whereClauseLikeFields) +
+            sizeof($this->whereInFields) +
             sizeof($this->whereCustomClauses);
     }
 
@@ -139,6 +141,13 @@ class SQLSelect {
      */
     public function addWhereClauseLikeField(Field $field) {
         $this->whereClauseLikeFields[] = $field;
+    }
+
+    /**
+     * @param Field $field
+     */
+    public function addWhereInField(Field $field) {
+        $this->whereInFields[] = $field;
     }
 
     public function addWhereCustomClause($clause) {
@@ -321,6 +330,24 @@ class SQLSelect {
             $statement .= ")";
             if ($fieldCounter != $this->getGlobalWhereClausesCount()) {
                 $statement .= " AND ";
+            }
+        }
+
+        if (sizeof($this->whereInFields) > 0) {
+            foreach ($this->whereInFields as $field) {
+                if (is_array($field->getValue())) {
+                    $statement .= "`".$field->getDatabase()."`.`".$field->getName()."` IN (";
+                    $items = "";
+                    foreach ($field->getValue() as $item) {
+                        $items .= "$item,";
+                    }
+                    $statement .= rtrim($items,",");
+                    $statement .= ")";
+                    $fieldCounter++;
+                    if ($fieldCounter != $this->getGlobalWhereClausesCount()) {
+                        $statement .= " AND ";
+                    }
+                }
             }
         }
 
