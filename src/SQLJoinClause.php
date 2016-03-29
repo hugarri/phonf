@@ -17,57 +17,97 @@ class SQLJoinClause {
         $this->setTableAlias($tableAlias);
     }
 
+    /**
+     * @return $this
+     */
     public function setInnerJoin() {
         $this->isLeftJoin = false;
+
+        return $this;
     }
 
     /**
      * @param string $tableName
+     * @return $this
      */
     public function setTable($tableName) {
         $this->tableName = $tableName;
+
+        return $this;
     }
 
     /**
      * @param string $tableAlias
+     * @return $this
      */
     public function setTableAlias($tableAlias) {
         $this->tableAlias = $tableAlias;
+
+        return $this;
     }
 
     /**
      * @param Field $field
+     * @return $this
      */
     public function addOriginField(Field $field) {
         $this->originFields[] = $field;
+
+        return $this;
     }
 
     /**
      * @param Field $field
+     * @return $this
      */
     public function addDestinyField(Field $field) {
         $this->destinyFields[] = $field;
+
+        return $this;
     }
 
+    /**
+     * @param Field $originField
+     * @param Field $destinyField
+     * @return $this
+     */
     public function addOnClauseFields(Field $originField, Field $destinyField) {
         $this->addOriginField($originField);
         $this->addDestinyField($destinyField);
+
+        return $this;
     }
 
     /**
      * @param Field $field
+     * @return $this
      */
     public function addConditionField(Field $field) {
         $this->conditionFields[] = $field;
+
+        return $this;
     }
 
+    /**
+     * @param $value
+     * @return $this
+     */
     public function addConditionValue($value) {
         $this->conditionValues[] = $value;
+
+        return $this;
     }
 
+    /**
+     * @param Field $field
+     * @param $value
+     * @return $this
+     */
     public function addOnClauseCondition(Field $field, $value) {
         $this->addConditionField($field);
         $this->addConditionValue($value);
+
+        return $this;
     }
 
     public function getQuery() {
