@@ -16,23 +16,32 @@ class SQLUpdate {
 
     /**
      * @param string $tableName
+     * @return $this
      */
     public function setTable($tableName) {
         $this->tableName = $tableName;
+
+        return $this;
     }
 
     /**
      * @param Field $field
+     * @return $this
      */
     public function addField($field) {
         $this->fields[] = $field;
+
+        return $this;
     }
 
     /**
      * @param Field $field
+     * @return $this
      */
     public function addWhereClauseField($field) {
         $this->whereClauseFields[] = $field;
+
+        return $this;
     }
 
     /**

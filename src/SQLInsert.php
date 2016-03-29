@@ -15,20 +15,28 @@ class SQLInsert {
 
     /**
      * @param string $tableName
+     * @return $this
      */
     public function setTable($tableName) {
         $this->tableName = $tableName;
+
+        return $this;
     }
 
     /**
      * @param Field $field
+     * @return $this
      */
     public function addField(Field $field) {
         $this->fields[] = $field;
+
+        return $this;
     }
 
     public function addFields($fieldsArray) {
         $this->fields = array_merge($this->fields, $fieldsArray);
+
+        return $this;
     }
 
     /**

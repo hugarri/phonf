@@ -32,95 +32,181 @@ class SQLSelect {
 
     /**
      * @param string $tableName
+     * @return $this
      */
     public function setTable($tableName) {
         $this->tableName = $tableName;
+
+        return $this;
     }
 
+    /**
+     * @return $this
+     */
     public function setDistinct() {
         $this->distinct = true;
+
+        return $this;
     }
 
     /**
      * @param Field $field
+     * @return $this
      */
     public function addField(Field $field) {
         $this->fields[] = $field;
+
+        return $this;
     }
 
+    /**
+     * @param $array
+     * @return $this
+     */
     public function addFields($fieldsArray) {
         $this->fields = array_merge($this->fields, $fieldsArray);
+
+        return $this;
     }
 
     /**
      * @param SQLIfClause $sqlIfClause
+     * @return $this
      */
     public function addIfClause(SQLIfClause $sqlIfClause) {
         $this->ifClauses[] = $sqlIfClause;
+
+        return $this;
     }
 
+    /**
+     * @param array $fieldsArray
+     * @return $this
+     */
     public function addIfClauses($fieldsArray) {
         $this->ifClauses = $fieldsArray;
+
+        return $this;
     }
 
     /**
      * @param SQLCountClause $SQLCountClause
+     * @return $this
      */
     public function addCountClause(SQLCountClause $SQLCountClause) {
         $this->countClauses[] = $SQLCountClause;
+
+        return $this;
     }
 
+    /**
+     * @param array $fieldsArray
+     * @return $this
+     */
     public function addCountClauses($fieldsArray) {
         $this->countClauses = $fieldsArray;
+
+        return $this;
     }
 
     /**
      * @param SQLJoinClause $sqlJoinClause
+     * @return $this
      */
     public function addJoinClause(SQLJoinClause $sqlJoinClause) {
         $this->joinClauses[] = $sqlJoinClause;
+
+        return $this;
     }
 
     /**
      * @param Field $field
+     * @return $this
      */
     public function addWhereClauseField(Field $field) {
         $this->whereClauseFields[] = $field;
+
+        return $this;
     }
 
     /**
      * @param Field $field
+     * @return $this
      */
     public function addWhereLessThanClauseField(Field $field) {
         $this->whereLessThanClauseFields[] = $field;
+
+        return $this;
     }
 
     /**
      * @param Field $field
+     * @return $this
      */
     public function addWhereLessOrEqualThanClauseField(Field $field) {
         $this->whereLessOrEqualThanClauseFields[] = $field;
+
+        return $this;
     }
 
     /**
      * @param Field $field
+     * @return $this
      */
     public function addWhereMoreThanClauseField(Field $field) {
         $this->whereMoreThanClauseFields[] = $field;
+
+        return $this;
     }
 
     /**
      * @param Field $field
+     * @return $this
      */
     public function addWhereMoreOrEqualThanClauseField(Field $field) {
         $this->whereMoreOrEqualThanClauseFields[] = $field;
+
+        return $this;
     }
 
     /**
      * @param Field $field
+     * @return $this
      */
     public function addWhereIsNotNullClauseField(Field $field) {
         $this->whereIsNotNullClauseFields[] = $field;
+
+        return $this;
+    }
+
+    /**
+     * @param Field $field
+     * @return $this
+     */
+    public function addWhereClauseLikeField(Field $field) {
+        $this->whereClauseLikeFields[] = $field;
+
+        return $this;
+    }
+
+    /**
+     * @param Field $field
+     * @return $this
+     */
+    public function addWhereInField(Field $field) {
+        $this->whereInFields[] = $field;
+
+        return $this;
+    }
+
+    /**
+     * @param string $clause
+     * @return $this
+     */
+    public function addWhereCustomClause($clause) {
+        $this->whereCustomClauses[] = $clause;
+
+        return $this;
     }
 
     public function getGlobalWhereClausesCount() {
@@ -137,57 +223,63 @@ class SQLSelect {
     }
 
     /**
-     * @param Field $field
-     */
-    public function addWhereClauseLikeField(Field $field) {
-        $this->whereClauseLikeFields[] = $field;
-    }
-
-    /**
-     * @param Field $field
-     */
-    public function addWhereInField(Field $field) {
-        $this->whereInFields[] = $field;
-    }
-
-    public function addWhereCustomClause($clause) {
-        $this->whereCustomClauses[] = $clause;
-    }
-
-    /**
      * @param SQLOrderByClause $orderByClause
+     * @return $this
      */
     public function addOrderByClause(SQLOrderByClause $orderByClause) {
         $this->orderByClauses[] = $orderByClause;
+
+        return $this;
     }
 
     /**
      * @param Field $field
+     * @return $this
      */
     public function addOrderByClauseAsc(Field $field) {
         $this->orderByClauses[] = new SQLOrderByClause($field, true);
+
+        return $this;
     }
 
     /**
      * @param Field $field
+     * @return $this
      */
     public function addOrderByClauseDesc(Field $field) {
         $this->orderByClauses[] = new SQLOrderByClause($field, false);
+
+        return $this;
     }
 
     /**
      * @param Field $field
+     * @return $this
      */
     public function addBindField(Field $field) {
         $this->bindResult[] = $field;
+
+        return $this;
     }
 
+    /**
+     * @param int $limit
+     * @return $this
+     */
     public function setLimit($limit) {
         $this->limit = $limit;
+
+        return $this;
     }
 
+    /**
+     * @param int $offset
+     * @return $this
+     */
     public function setOffset($offset) {
         $this->offset = $offset;
+
+        return $this;
     }
 
     /**

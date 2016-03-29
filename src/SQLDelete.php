@@ -16,20 +16,32 @@ class SQLDelete {
 
     /**
      * @param string $tableName
+     * @return $this
      */
     public function setTable($tableName) {
         $this->tableName = $tableName;
+
+        return $this;
     }
 
     /**
      * @param Field $field
+     * @return $this
      */
     public function addWhereClauseField(Field $field) {
         $this->whereClauseFields[] = $field;
+
+        return $this;
     }
 
+    /**
+     * @param string $clause
+     * @return $this
+     */
     public function addWhereCustomClause($clause) {
         $this->whereCustomClauses[] = $clause;
+
+        return $this;
     }
 
     public function getGlobalWhereClausesCount() {
