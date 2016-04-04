@@ -19,6 +19,7 @@ class SQLSelect {
     private $whereIsNotNullClauseFields = array();
     private $whereClauseLikeFields = array();
     private $whereInFields = array();
+    private $whereNotInFields = array();
     private $whereCustomClauses = array();
     private $orderByClauses = array();
     private $bindResult = array();
@@ -200,6 +201,16 @@ class SQLSelect {
     }
 
     /**
+     * @param Field $field
+     * @return $this
+     */
+    public function addWhereNotInField(Field $field) {
+        $this->whereNotInFields[] = $field;
+
+        return $this;
+    }
+
+    /**
      * @param string $clause
      * @return $this
      */
@@ -219,6 +230,7 @@ class SQLSelect {
             sizeof($this->whereIsNotNullClauseFields) +
             sizeof($this->whereClauseLikeFields) +
             sizeof($this->whereInFields) +
+            sizeof($this->whereNotInFields) +
             sizeof($this->whereCustomClauses);
     }
 
@@ -429,6 +441,24 @@ class SQLSelect {
             foreach ($this->whereInFields as $field) {
                 if (is_array($field->getValue())) {
                     $statement .= "`".$field->getDatabase()."`.`".$field->getName()."` IN (";
+                    $items = "";
+                    foreach ($field->getValue() as $item) {
+                        $items .= "$item,";
+                    }
+                    $statement .= rtrim($items,",");
+                    $statement .= ")";
+                    $fieldCounter++;
+                    if ($fieldCounter != $this->getGlobalWhereClausesCount()) {
+                        $statement .= " AND ";
+                    }
+                }
+            }
+        }
+
+        if (sizeof($this->whereNotInFields) > 0) {
+            foreach ($this->whereNotInFields as $field) {
+                if (is_array($field->getValue())) {
+                    $statement .= "`".$field->getDatabase()."`.`".$field->getName()."` NOT IN (";
                     $items = "";
                     foreach ($field->getValue() as $item) {
                         $items .= "$item,";
