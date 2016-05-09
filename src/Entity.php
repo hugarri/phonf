@@ -18,39 +18,45 @@ abstract class Entity {
             $field->setTableAlias($alias);
         endforeach;
     }
+    
+    public function val($fieldName, $value = null) {
+        if (!is_null($value)) $this->setFieldValue($fieldName, $value);
 
-    protected function createField($fieldname, Field $field) {
-        $this->fields[$fieldname] = $field;
+        return $this->getFieldValue($fieldName);
     }
 
-    public function setFieldValue($fieldname, $value, $queryResult = false) {
+    protected function createField($fieldName, Field $field) {
+        $this->fields[$fieldName] = $field;
+    }
+
+    public function setFieldValue($fieldName, $value, $queryResult = false) {
         if($queryResult) :
             $tableAlias = array_values($this->fields)[0]->getDatabase();
-            if(strpos($fieldname, $tableAlias) !== false) :
+            if(strpos($fieldName, $tableAlias) !== false) :
                 foreach($this->fields as $id => $field) :
-                    if ($field->getDBAlias() == $fieldname) :
+                    if ($field->getDBAlias() == $fieldName) :
                         $this->fields[$id]->setValue($value);
                     endif;
                 endforeach;
             endif;
         else :
-            if(array_key_exists($fieldname, $this->fields)) :
-                $this->fields[$fieldname]->setValue($value);
+            if(array_key_exists($fieldName, $this->fields)) :
+                $this->fields[$fieldName]->setValue($value);
             endif;
         endif;
     }
 
-    public function getField($fieldname) {
-        if(array_key_exists($fieldname, $this->fields)) :
-            return $this->fields[$fieldname];
+    public function getField($fieldName) {
+        if(array_key_exists($fieldName, $this->fields)) :
+            return $this->fields[$fieldName];
         endif;
 
         return null;
     }
 
-    public function getFieldValue($fieldname) {
-        if(array_key_exists($fieldname, $this->fields)) :
-            return $this->fields[$fieldname]->getValue();
+    public function getFieldValue($fieldName) {
+        if(array_key_exists($fieldName, $this->fields)) :
+            return $this->fields[$fieldName]->getValue();
         endif;
 
         return null;
