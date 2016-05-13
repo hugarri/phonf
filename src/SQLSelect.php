@@ -12,6 +12,7 @@ class SQLSelect {
     private $countClauses = array();
     private $joinClauses = array();
     private $whereClauseFields = array();
+    private $whereDistinctClauseFields = array();
     private $whereLessThanClauseFields = array();
     private $whereLessOrEqualThanClauseFields = array();
     private $whereMoreThanClauseFields = array();
@@ -61,7 +62,7 @@ class SQLSelect {
     }
 
     /**
-     * @param $array
+     * @param array
      * @return $this
      */
     public function addFields($fieldsArray) {
@@ -126,6 +127,16 @@ class SQLSelect {
      */
     public function addWhereClauseField(Field $field) {
         $this->whereClauseFields[] = $field;
+
+        return $this;
+    }
+
+    /**
+     * @param Field $field
+     * @return $this
+     */
+    public function addWhereDistinctClauseField(Field $field) {
+        $this->whereDistinctClauseFields[] = $field;
 
         return $this;
     }
@@ -223,6 +234,7 @@ class SQLSelect {
     public function getGlobalWhereClausesCount() {
         return
             sizeof($this->whereClauseFields) +
+            sizeof($this->whereDistinctClauseFields) +
             sizeof($this->whereLessThanClauseFields) +
             sizeof($this->whereMoreThanClauseFields) +
             sizeof($this->whereLessOrEqualThanClauseFields) +
@@ -362,6 +374,19 @@ class SQLSelect {
                     $statement .= "`" . $field->getDatabase() . "`.`" . $field->getName() . "` IS " . $field->getDBValue();
                 } else {
                     $statement .= "`" . $field->getDatabase() . "`.`" . $field->getName() . "` = " . $field->getDBValue();
+                }
+                $fieldCounter++;
+                if ($fieldCounter != $this->getGlobalWhereClausesCount()) {
+                    $statement .= " AND ";
+                }
+            }
+        }
+
+        if (sizeof($this->whereDistinctClauseFields) > 0) {
+            foreach ($this->whereDistinctClauseFields as $field) {
+                /** @var $field Field */
+                if ($field->getDBValue() === "null") {
+                    $statement .= "`" . $field->getDatabase() . "`.`" . $field->getName() . "` != " . $field->getDBValue();
                 }
                 $fieldCounter++;
                 if ($fieldCounter != $this->getGlobalWhereClausesCount()) {
