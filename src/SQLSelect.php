@@ -386,6 +386,8 @@ class SQLSelect {
             foreach ($this->whereDistinctClauseFields as $field) {
                 /** @var $field Field */
                 if ($field->getDBValue() === "null") {
+                    $statement .= "`" . $field->getDatabase() . "`.`" . $field->getName() . "` IS NOT " . $field->getDBValue();
+                } else {
                     $statement .= "`" . $field->getDatabase() . "`.`" . $field->getName() . "` != " . $field->getDBValue();
                 }
                 $fieldCounter++;
