@@ -54,14 +54,6 @@ abstract class Entity {
         return null;
     }
 
-    public function getFieldValue($fieldName) {
-        if(array_key_exists($fieldName, $this->fields)) :
-            return $this->fields[$fieldName]->getValue();
-        endif;
-
-        return null;
-    }
-
     public function getFields() {
         $aux = array();
         foreach ($this->fields as $id => $field) :
@@ -71,6 +63,18 @@ abstract class Entity {
         endforeach;
 
         return $aux;
+    }
+
+    public function getEssentialFields() {
+        return $this->getFields();
+    }
+
+    public function getFieldValue($fieldName) {
+        if(array_key_exists($fieldName, $this->fields)) :
+            return $this->fields[$fieldName]->getValue();
+        endif;
+
+        return null;
     }
 
     public function createEntity($entityName, Entity $entity) {
