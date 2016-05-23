@@ -73,6 +73,10 @@ abstract class Entity {
         return $aux;
     }
 
+    public function getEssentialFields() {
+        return $this->getFields();
+    }
+
     public function createEntity($entityName, Entity $entity) {
         $this->entities[$entityName] = $entity;
     }
