@@ -470,7 +470,7 @@ class SQLSelect {
                     $statement .= "`".$field->getDatabase()."`.`".$field->getName()."` IN (";
                     $items = "";
                     foreach ($field->getValue() as $item) {
-                        $items .= "$item,";
+                        $items .= "'$item',";
                     }
                     $statement .= rtrim($items,",");
                     $statement .= ")";
@@ -488,7 +488,7 @@ class SQLSelect {
                     $statement .= "`".$field->getDatabase()."`.`".$field->getName()."` NOT IN (";
                     $items = "";
                     foreach ($field->getValue() as $item) {
-                        $items .= "$item,";
+                        $items .= "'$item',";
                     }
                     $statement .= rtrim($items,",");
                     $statement .= ")";
