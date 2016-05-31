@@ -72,6 +72,15 @@ class SQLSelect {
     }
 
     /**
+     * @return $this
+     */
+    public function clearFields() {
+        $this->fields = array();
+
+        return $this;
+    }
+
+    /**
      * @param SQLIfClause $sqlIfClause
      * @return $this
      */
