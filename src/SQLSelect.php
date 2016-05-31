@@ -285,6 +285,12 @@ class SQLSelect {
         return $this;
     }
 
+    public function clearOrderByClauses() {
+        $this->orderByClauses = array();
+
+        return $this;
+    }
+
     /**
      * @param Field $field
      * @return $this
