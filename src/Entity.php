@@ -85,19 +85,37 @@ abstract class Entity {
         $this->collections[$collectionName] = $collection;
     }
 
-    public function getArray() {
+    public function getArray($structureToReturn = null) {
         $array = array();
         $null = true;
+
+        $fieldsToReturn = $entitiesToReturn = $collectionsToReturn = array();
+        if (!empty($structureToReturn)) {
+            if (isset($structureToReturn->Fields)) $fieldsToReturn = $structureToReturn->Fields;
+            if (isset($structureToReturn->Entities)) :
+                foreach ($structureToReturn->Entities as $entity) $entitiesToReturn[$entity->Entity] = $entity;
+            endif;
+            if (isset($structureToReturn->Collections)) :
+                foreach ($structureToReturn->Collections as $collection) $collectionsToReturn[$collection->Collection] = $collection;
+            endif;
+        }
+
         foreach($this->fields as $id => $field) :
-            $value = $this->getFieldValue($id);
-            $array[$id] = $value;
-            if (!is_null($value) and $null == true) $null = false;
+            if (empty($fieldsToReturn) or in_array($id, $fieldsToReturn)) :
+                $value = $this->getFieldValue($id);
+                $array[$id] = $value;
+                if (!is_null($value) and $null == true) $null = false;
+            endif;
         endforeach;
 
         if ($this->entities) :
             foreach($this->entities as $id => $entity) :
                 /* @var $entity Entity */
-                $array[$id] = $entity->getArray();
+                if (empty($entitiesToReturn) or isset($entitiesToReturn[$id])) :
+                    $entityStructureToReturn = null;
+                    if (array_key_exists($id, $entitiesToReturn)) $entityStructureToReturn = $entitiesToReturn[$id];
+                    $array[$id] = $entity->getArray($entityStructureToReturn);
+                endif;
             endforeach;
         endif;
 
@@ -105,9 +123,11 @@ abstract class Entity {
             foreach($this->collections as $id => $entities) :
                 if ($entities) :
                     $collection = array();
-                    foreach($entities as $internalId => $entity) :
+                    foreach ($entities as $internalId => $entity) :
                         /* @var $entity Entity */
-                        $collection[$internalId] = $entity->getArray();
+                        $collectionStructureToReturn = null;
+                        if (array_key_exists($id, $collectionsToReturn)) $collectionStructureToReturn = $collectionsToReturn[$id];
+                        $collection[$internalId] = $entity->getArray($collectionStructureToReturn);
                     endforeach;
                     $array[$id] = $collection;
                 endif;
