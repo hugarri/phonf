@@ -470,7 +470,7 @@ class SQLSelect {
                 $fieldCounterBis++;
                 $fieldCounter++;
                 if ($fieldCounterBis != sizeof($this->whereClauseLikeFields) AND sizeof($this->whereClauseLikeFields) >= 1) {
-                    $statement .= " OR ";
+                    $statement .= " AND ";
                 }
             }
             $statement .= ")";
