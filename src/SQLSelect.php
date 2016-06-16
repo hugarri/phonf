@@ -538,7 +538,7 @@ class SQLSelect {
                 }
                 $statement .= "`" . $field->getDatabase() . "`.`" . $field->getName() . "` $asc";
                 $fieldCounter++;
-                if ($fieldCounter != sizeof($this->orderByClauses) AND $fieldCounter >= 1) {
+                if ($fieldCounter != sizeof($this->orderByClauses)) {
                     $statement .= ", ";
                 }
             }
