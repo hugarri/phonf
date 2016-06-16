@@ -17,6 +17,7 @@ class SQLSelect {
     private $whereLessOrEqualThanClauseFields = array();
     private $whereMoreThanClauseFields = array();
     private $whereMoreOrEqualThanClauseFields = array();
+    private $whereIsNullClauseFields = array();
     private $whereIsNotNullClauseFields = array();
     private $whereClauseLikeFields = array();
     private $whereInFields = array();
@@ -194,6 +195,16 @@ class SQLSelect {
      * @param Field $field
      * @return $this
      */
+    public function addWhereIsNullClauseField(Field $field) {
+        $this->whereIsNullClauseFields[] = $field;
+
+        return $this;
+    }
+
+    /**
+     * @param Field $field
+     * @return $this
+     */
     public function addWhereIsNotNullClauseField(Field $field) {
         $this->whereIsNotNullClauseFields[] = $field;
 
@@ -248,6 +259,7 @@ class SQLSelect {
             sizeof($this->whereMoreThanClauseFields) +
             sizeof($this->whereLessOrEqualThanClauseFields) +
             sizeof($this->whereMoreOrEqualThanClauseFields) +
+            sizeof($this->whereIsNullClauseFields) +
             sizeof($this->whereIsNotNullClauseFields) +
             sizeof($this->whereClauseLikeFields) +
             sizeof($this->whereInFields) +
@@ -455,6 +467,16 @@ class SQLSelect {
         if (sizeof($this->whereIsNotNullClauseFields) > 0) {
             foreach ($this->whereIsNotNullClauseFields as $field) {
                 $statement .= "`" . $field->getDatabase() . "`.`" . $field->getName() . "` IS NOT NULL";
+                $fieldCounter++;
+                if ($fieldCounter != $this->getGlobalWhereClausesCount()) {
+                    $statement .= " AND ";
+                }
+            }
+        }
+
+        if (sizeof($this->whereIsNullClauseFields) > 0) {
+            foreach ($this->whereIsNullClauseFields as $field) {
+                $statement .= "`" . $field->getDatabase() . "`.`" . $field->getName() . "` IS NULL";
                 $fieldCounter++;
                 if ($fieldCounter != $this->getGlobalWhereClausesCount()) {
                     $statement .= " AND ";
