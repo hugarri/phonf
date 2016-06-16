@@ -81,8 +81,22 @@ abstract class Entity {
         $this->entities[$entityName] = $entity;
     }
 
+    public function getEntity($entityName) {
+        if (array_key_exists($entityName, $this->entities)) {
+            return $this->entities[$entityName];
+        }
+        return null;
+    }
+
     public function createCollection($collectionName, $collection) {
         $this->collections[$collectionName] = $collection;
+    }
+
+    public function getCollection($collectionName) {
+        if (array_key_exists($collectionName, $this->collections)) {
+            return $this->collections[$collectionName];
+        }
+        return null;
     }
 
     public function getArray($structureToReturn = null) {
