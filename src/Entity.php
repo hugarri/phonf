@@ -81,6 +81,10 @@ abstract class Entity {
         $this->entities[$entityName] = $entity;
     }
 
+    /**
+     * @param $entityName
+     * @return Entity|null
+     */
     public function getEntity($entityName) {
         if (array_key_exists($entityName, $this->entities)) {
             return $this->entities[$entityName];

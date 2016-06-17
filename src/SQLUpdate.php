@@ -8,6 +8,7 @@ class SQLUpdate {
     private $tableName;
     private $fields = array();
     private $whereClauseFields = array();
+    private $whereInFields = array();
 
     function __construct(\mysqli $connection, $table = null) {
         $this->connection = $connection;
@@ -45,6 +46,22 @@ class SQLUpdate {
     }
 
     /**
+     * @param Field $field
+     * @return $this
+     */
+    public function addWhereInField(Field $field) {
+        $this->whereInFields[] = $field;
+
+        return $this;
+    }
+
+    public function getGlobalWhereClausesCount() {
+        return
+            sizeof($this->whereClauseFields) +
+            sizeof($this->whereInFields);
+    }
+
+    /**
      * @return string
      */
     public function getQuery() {
@@ -60,11 +77,38 @@ class SQLUpdate {
         }
         $fieldCounter = 0;
         $statement .= " WHERE ";
-        foreach($this->whereClauseFields as $field) {
-            $statement .= "`" . $field->getName() . "` = " . $field->getDBValue();
-            $fieldCounter++;
-            if ($fieldCounter != sizeof($this->whereClauseFields) AND $fieldCounter >= 1) {
-                $statement .= " AND ";
+
+        if (sizeof($this->whereClauseFields) > 0) {
+            foreach ($this->whereClauseFields as $field) {
+                /** @var $field Field */
+                if ($field->getDBValue() === "null") {
+                    $statement .= "`" . $field->getDatabase() . "`.`" . $field->getName() . "` IS " . $field->getDBValue();
+                } else {
+                    $statement .= "`" . $field->getDatabase() . "`.`" . $field->getName() . "` = " . $field->getDBValue();
+                }
+                $fieldCounter++;
+                if ($fieldCounter != $this->getGlobalWhereClausesCount()) {
+                    $statement .= " AND ";
+                }
+            }
+        }
+
+        if (sizeof($this->whereInFields) > 0) {
+            foreach ($this->whereInFields as $field) {
+                /** @var $field Field */
+                if (is_array($field->getValue())) {
+                    $statement .= "`".$field->getDatabase()."`.`".$field->getName()."` IN (";
+                    $items = "";
+                    foreach ($field->getValue() as $item) {
+                        $items .= "'$item',";
+                    }
+                    $statement .= rtrim($items,",");
+                    $statement .= ")";
+                    $fieldCounter++;
+                    if ($fieldCounter != $this->getGlobalWhereClausesCount()) {
+                        $statement .= " AND ";
+                    }
+                }
             }
         }
 
