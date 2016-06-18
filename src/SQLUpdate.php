@@ -56,6 +56,16 @@ class SQLUpdate {
         return $this;
     }
 
+    /**
+     * @param Field $field
+     * @return $this
+     */
+    public function addWhereIsNullClauseField(Field $field) {
+        $this->whereIsNullClauseFields[] = $field;
+
+        return $this;
+    }
+
     public function getGlobalWhereClausesCount() {
         return
             sizeof($this->whereClauseFields) +
