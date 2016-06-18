@@ -9,6 +9,7 @@ class SQLUpdate {
     private $fields = array();
     private $whereClauseFields = array();
     private $whereInFields = array();
+    private $whereIsNullClauseFields = array();
 
     function __construct(\mysqli $connection, $table = null) {
         $this->connection = $connection;
@@ -58,7 +59,8 @@ class SQLUpdate {
     public function getGlobalWhereClausesCount() {
         return
             sizeof($this->whereClauseFields) +
-            sizeof($this->whereInFields);
+            sizeof($this->whereInFields) +
+            sizeof($this->whereIsNullClauseFields);
     }
 
     /**
@@ -108,6 +110,16 @@ class SQLUpdate {
                     if ($fieldCounter != $this->getGlobalWhereClausesCount()) {
                         $statement .= " AND ";
                     }
+                }
+            }
+        }
+
+        if (sizeof($this->whereIsNullClauseFields) > 0) {
+            foreach ($this->whereIsNullClauseFields as $field) {
+                $statement .= "`" . $field->getDatabase() . "`.`" . $field->getName() . "` IS NULL";
+                $fieldCounter++;
+                if ($fieldCounter != $this->getGlobalWhereClausesCount()) {
+                    $statement .= " AND ";
                 }
             }
         }
