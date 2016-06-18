@@ -9,6 +9,7 @@ class SQLDelete {
     private $whereClauseFields = array();
     private $whereCustomClauses = array();
     private $whereInFields = array();
+    private $whereIsNullClauseFields = array();
 
     function __construct(\mysqli $connection, $table = null) {
         $this->connection = $connection;
@@ -55,11 +56,22 @@ class SQLDelete {
         return $this;
     }
 
+    /**
+     * @param Field $field
+     * @return $this
+     */
+    public function addWhereIsNullClauseField(Field $field) {
+        $this->whereIsNullClauseFields[] = $field;
+
+        return $this;
+    }
+
     public function getGlobalWhereClausesCount() {
         return
             sizeof($this->whereClauseFields) +
             sizeof($this->whereCustomClauses) +
-            sizeof($this->whereInFields);
+            sizeof($this->whereInFields) +
+            sizeof($this->whereIsNullClauseFields);
     }
 
     /**
@@ -73,7 +85,11 @@ class SQLDelete {
         if (sizeof($this->whereClauseFields) > 0) {
             foreach ($this->whereClauseFields as $field) {
                 /** @var $field Field */
-                $statement .= "`" . $field->getName() . "` = " . $field->getDBValue();
+                if ($field->getDBValue() === "null") {
+                    $statement .= "`" . $field->getDatabase() . "`.`" . $field->getName() . "` IS " . $field->getDBValue();
+                } else {
+                    $statement .= "`" . $field->getDatabase() . "`.`" . $field->getName() . "` = " . $field->getDBValue();
+                }
                 $fieldCounter++;
                 if ($fieldCounter != $this->getGlobalWhereClausesCount()) {
                     $statement .= " AND ";
@@ -103,6 +119,15 @@ class SQLDelete {
                     if ($fieldCounter != $this->getGlobalWhereClausesCount()) {
                         $statement .= " AND ";
                     }
+                }
+            }
+        }
+        if (sizeof($this->whereIsNullClauseFields) > 0) {
+            foreach ($this->whereIsNullClauseFields as $field) {
+                $statement .= "`" . $field->getDatabase() . "`.`" . $field->getName() . "` IS NULL";
+                $fieldCounter++;
+                if ($fieldCounter != $this->getGlobalWhereClausesCount()) {
+                    $statement .= " AND ";
                 }
             }
         }
