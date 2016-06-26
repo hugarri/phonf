@@ -11,18 +11,7 @@ class SQLSelect {
     private $ifClauses = array();
     private $countClauses = array();
     private $joinClauses = array();
-    private $whereClauseFields = array();
-    private $whereDistinctClauseFields = array();
-    private $whereLessThanClauseFields = array();
-    private $whereLessOrEqualThanClauseFields = array();
-    private $whereMoreThanClauseFields = array();
-    private $whereMoreOrEqualThanClauseFields = array();
-    private $whereIsNullClauseFields = array();
-    private $whereIsNotNullClauseFields = array();
-    private $whereClauseLikeFields = array();
-    private $whereInFields = array();
-    private $whereNotInFields = array();
-    private $whereCustomClauses = array();
+    private $whereClause;
     private $orderByClauses = array();
     private $bindResult = array();
     private $limit;
@@ -31,6 +20,7 @@ class SQLSelect {
     function __construct(\mysqli $connection, $table = null) {
         $this->connection = $connection;
         $this->setTable($table);
+        $this->whereClause = new SQLWhereClause();
     }
 
     /**
@@ -122,6 +112,13 @@ class SQLSelect {
     }
 
     /**
+     * @param SQLWhereClause $whereClause
+     */
+    public function setWhereClause(SQLWhereClause $whereClause) {
+        $this->whereClause = $whereClause;
+    }
+
+    /**
      * @param SQLJoinClause $sqlJoinClause
      * @return $this
      */
@@ -135,8 +132,8 @@ class SQLSelect {
      * @param Field $field
      * @return $this
      */
-    public function addWhereClauseField(Field $field) {
-        $this->whereClauseFields[] = $field;
+    public function addWhereClauseField($field) {
+        $this->whereClause->addWhereClauseField($field);
 
         return $this;
     }
@@ -146,7 +143,7 @@ class SQLSelect {
      * @return $this
      */
     public function addWhereDistinctClauseField(Field $field) {
-        $this->whereDistinctClauseFields[] = $field;
+        $this->whereClause->addWhereDistinctClauseField($field);
 
         return $this;
     }
@@ -156,7 +153,7 @@ class SQLSelect {
      * @return $this
      */
     public function addWhereLessThanClauseField(Field $field) {
-        $this->whereLessThanClauseFields[] = $field;
+        $this->whereClause->addWhereLessThanClauseField($field);
 
         return $this;
     }
@@ -166,7 +163,7 @@ class SQLSelect {
      * @return $this
      */
     public function addWhereLessOrEqualThanClauseField(Field $field) {
-        $this->whereLessOrEqualThanClauseFields[] = $field;
+        $this->whereClause->addWhereLessOrEqualThanClauseField($field);
 
         return $this;
     }
@@ -176,7 +173,7 @@ class SQLSelect {
      * @return $this
      */
     public function addWhereMoreThanClauseField(Field $field) {
-        $this->whereMoreThanClauseFields[] = $field;
+        $this->whereClause->addWhereMoreThanClauseField($field);
 
         return $this;
     }
@@ -186,7 +183,7 @@ class SQLSelect {
      * @return $this
      */
     public function addWhereMoreOrEqualThanClauseField(Field $field) {
-        $this->whereMoreOrEqualThanClauseFields[] = $field;
+        $this->whereClause->addWhereMoreOrEqualThanClauseField($field);
 
         return $this;
     }
@@ -196,7 +193,7 @@ class SQLSelect {
      * @return $this
      */
     public function addWhereIsNullClauseField(Field $field) {
-        $this->whereIsNullClauseFields[] = $field;
+        $this->whereClause->addWhereIsNullClauseField($field);
 
         return $this;
     }
@@ -206,7 +203,7 @@ class SQLSelect {
      * @return $this
      */
     public function addWhereIsNotNullClauseField(Field $field) {
-        $this->whereIsNotNullClauseFields[] = $field;
+        $this->whereClause->addWhereIsNotNullClauseField($field);
 
         return $this;
     }
@@ -216,7 +213,7 @@ class SQLSelect {
      * @return $this
      */
     public function addWhereClauseLikeField(Field $field) {
-        $this->whereClauseLikeFields[] = $field;
+        $this->whereClause->addWhereClauseLikeField($field);
 
         return $this;
     }
@@ -226,7 +223,7 @@ class SQLSelect {
      * @return $this
      */
     public function addWhereInField(Field $field) {
-        $this->whereInFields[] = $field;
+        $this->whereClause->addWhereInField($field);
 
         return $this;
     }
@@ -236,7 +233,7 @@ class SQLSelect {
      * @return $this
      */
     public function addWhereNotInField(Field $field) {
-        $this->whereNotInFields[] = $field;
+        $this->whereClause->addWhereNotInField($field);
 
         return $this;
     }
@@ -246,25 +243,9 @@ class SQLSelect {
      * @return $this
      */
     public function addWhereCustomClause($clause) {
-        $this->whereCustomClauses[] = $clause;
+        $this->whereClause->addWhereCustomClause($clause);
 
         return $this;
-    }
-
-    public function getGlobalWhereClausesCount() {
-        return
-            sizeof($this->whereClauseFields) +
-            sizeof($this->whereDistinctClauseFields) +
-            sizeof($this->whereLessThanClauseFields) +
-            sizeof($this->whereMoreThanClauseFields) +
-            sizeof($this->whereLessOrEqualThanClauseFields) +
-            sizeof($this->whereMoreOrEqualThanClauseFields) +
-            sizeof($this->whereIsNullClauseFields) +
-            sizeof($this->whereIsNotNullClauseFields) +
-            sizeof($this->whereClauseLikeFields) +
-            sizeof($this->whereInFields) +
-            sizeof($this->whereNotInFields) +
-            sizeof($this->whereCustomClauses);
     }
 
     /**
@@ -339,18 +320,14 @@ class SQLSelect {
     public function getQuery() {
         $statement = "SELECT ";
 
-        if ($this->distinct) {
-            $statement .= "DISTINCT ";
-        }
+        if ($this->distinct) $statement .= "DISTINCT ";
 
         $fieldCounter = 0;
         foreach ($this->fields as $field) {
             /** @var $field Field */
             $statement .= "`" . $field->getDatabase() . "`.`" . $field->getName() . "` AS `" . $field->getDatabase() . $field->getName() . "`";
             $fieldCounter++;
-            if ($fieldCounter != (sizeof($this->fields) + sizeof($this->ifClauses) + sizeof($this->countClauses))) {
-                $statement .= ", ";
-            }
+            if ($fieldCounter != (sizeof($this->fields) + sizeof($this->ifClauses) + sizeof($this->countClauses))) $statement .= ", ";
         }
         foreach ($this->ifClauses as $ifClause) {
             /** @var $ifClause SQLIfClause */
@@ -365,9 +342,7 @@ class SQLSelect {
 
             $statement .= "IF ($condition, $trueClause, $falseClause) AS $alias";
             $fieldCounter++;
-            if ($fieldCounter != (sizeof($this->fields) + sizeof($this->ifClauses) + sizeof($this->countClauses))) {
-                $statement .= ", ";
-            }
+            if ($fieldCounter != (sizeof($this->fields) + sizeof($this->ifClauses) + sizeof($this->countClauses))) $statement .= ", ";
         }
         foreach ($this->countClauses as $countClause) {
             /** @var $countClause SQLCountClause */
@@ -375,177 +350,17 @@ class SQLSelect {
             $aliasField = $countClause->getAliasField();
             $statement .= "COUNT(DISTINCT `" . $field->getDatabase() . "`.`" . $field->getName() . "`) AS `" . $aliasField->getDatabase() . $aliasField->getName() . "`";
             $fieldCounter++;
-            if ($fieldCounter != (sizeof($this->fields) + sizeof($this->ifClauses) + sizeof($this->countClauses))) {
-                $statement .= ", ";
-            }
+            if ($fieldCounter != (sizeof($this->fields) + sizeof($this->ifClauses) + sizeof($this->countClauses))) $statement .= ", ";
         }
 
-        $statement .= " FROM ";
-
-        $statement .= "`" . $this->tableName . "`";
+        $statement .= " FROM `" . $this->tableName . "`";
 
         foreach ($this->joinClauses as $joinClause) {
             /** @var $joinClause SQLJoinClause */
             $statement .= $joinClause->getQuery();
         }
 
-        if ($this->getGlobalWhereClausesCount() > 0) {
-            $statement .= " WHERE ";
-            $fieldCounter = 0;
-        }
-
-        if (sizeof($this->whereClauseFields) > 0) {
-            foreach ($this->whereClauseFields as $field) {
-                /** @var $field Field */
-                if ($field->getDBValue() === "null") {
-                    $statement .= "`" . $field->getDatabase() . "`.`" . $field->getName() . "` IS " . $field->getDBValue();
-                } else {
-                    $statement .= "`" . $field->getDatabase() . "`.`" . $field->getName() . "` = " . $field->getDBValue();
-                }
-                $fieldCounter++;
-                if ($fieldCounter != $this->getGlobalWhereClausesCount()) {
-                    $statement .= " AND ";
-                }
-            }
-        }
-
-        if (sizeof($this->whereDistinctClauseFields) > 0) {
-            foreach ($this->whereDistinctClauseFields as $field) {
-                /** @var $field Field */
-                if ($field->getDBValue() === "null") {
-                    $statement .= "`" . $field->getDatabase() . "`.`" . $field->getName() . "` IS NOT " . $field->getDBValue();
-                } else {
-                    $statement .= "`" . $field->getDatabase() . "`.`" . $field->getName() . "` != " . $field->getDBValue();
-                }
-                $fieldCounter++;
-                if ($fieldCounter != $this->getGlobalWhereClausesCount()) {
-                    $statement .= " AND ";
-                }
-            }
-        }
-
-        if (sizeof($this->whereLessThanClauseFields) > 0) {
-            foreach ($this->whereLessThanClauseFields as $field) {
-                $statement .= "`" . $field->getDatabase() . "`.`" . $field->getName() . "` < " . $field->getDBValue();
-                $fieldCounter++;
-                if ($fieldCounter != $this->getGlobalWhereClausesCount()) {
-                    $statement .= " AND ";
-                }
-            }
-        }
-
-        if (sizeof($this->whereLessOrEqualThanClauseFields) > 0) {
-            foreach ($this->whereLessOrEqualThanClauseFields as $field) {
-                $statement .= "`" . $field->getDatabase() . "`.`" . $field->getName() . "` <= " . $field->getDBValue();
-                $fieldCounter++;
-                if ($fieldCounter != $this->getGlobalWhereClausesCount()) {
-                    $statement .= " AND ";
-                }
-            }
-        }
-
-        if (sizeof($this->whereMoreThanClauseFields) > 0) {
-            foreach ($this->whereMoreThanClauseFields as $field) {
-                $statement .= "`" . $field->getDatabase() . "`.`" . $field->getName() . "` > " . $field->getDBValue();
-                $fieldCounter++;
-                if ($fieldCounter != $this->getGlobalWhereClausesCount()) {
-                    $statement .= " AND ";
-                }
-            }
-        }
-
-        if (sizeof($this->whereMoreOrEqualThanClauseFields) > 0) {
-            foreach ($this->whereMoreOrEqualThanClauseFields as $field) {
-                $statement .= "`" . $field->getDatabase() . "`.`" . $field->getName() . "` >= " . $field->getDBValue();
-                $fieldCounter++;
-                if ($fieldCounter != $this->getGlobalWhereClausesCount()) {
-                    $statement .= " AND ";
-                }
-            }
-        }
-
-        if (sizeof($this->whereIsNotNullClauseFields) > 0) {
-            foreach ($this->whereIsNotNullClauseFields as $field) {
-                $statement .= "`" . $field->getDatabase() . "`.`" . $field->getName() . "` IS NOT NULL";
-                $fieldCounter++;
-                if ($fieldCounter != $this->getGlobalWhereClausesCount()) {
-                    $statement .= " AND ";
-                }
-            }
-        }
-
-        if (sizeof($this->whereIsNullClauseFields) > 0) {
-            foreach ($this->whereIsNullClauseFields as $field) {
-                $statement .= "`" . $field->getDatabase() . "`.`" . $field->getName() . "` IS NULL";
-                $fieldCounter++;
-                if ($fieldCounter != $this->getGlobalWhereClausesCount()) {
-                    $statement .= " AND ";
-                }
-            }
-        }
-
-        if (sizeof($this->whereClauseLikeFields) > 0) {
-            $statement .= "(";
-            $fieldCounterBis = 0;
-            foreach ($this->whereClauseLikeFields as $field) {
-                $statement .= "`" . $field->getDatabase() . "`.`" . $field->getName() . "` LIKE '%" . $field->getValue() . "%'";
-                $fieldCounterBis++;
-                $fieldCounter++;
-                if ($fieldCounterBis != sizeof($this->whereClauseLikeFields) AND sizeof($this->whereClauseLikeFields) >= 1) {
-                    $statement .= " AND ";
-                }
-            }
-            $statement .= ")";
-            if ($fieldCounter != $this->getGlobalWhereClausesCount()) {
-                $statement .= " AND ";
-            }
-        }
-
-        if (sizeof($this->whereInFields) > 0) {
-            foreach ($this->whereInFields as $field) {
-                if (is_array($field->getValue())) {
-                    $statement .= "`".$field->getDatabase()."`.`".$field->getName()."` IN (";
-                    $items = "";
-                    foreach ($field->getValue() as $item) {
-                        $items .= "'$item',";
-                    }
-                    $statement .= rtrim($items,",");
-                    $statement .= ")";
-                    $fieldCounter++;
-                    if ($fieldCounter != $this->getGlobalWhereClausesCount()) {
-                        $statement .= " AND ";
-                    }
-                }
-            }
-        }
-
-        if (sizeof($this->whereNotInFields) > 0) {
-            foreach ($this->whereNotInFields as $field) {
-                if (is_array($field->getValue())) {
-                    $statement .= "`".$field->getDatabase()."`.`".$field->getName()."` NOT IN (";
-                    $items = "";
-                    foreach ($field->getValue() as $item) {
-                        $items .= "'$item',";
-                    }
-                    $statement .= rtrim($items,",");
-                    $statement .= ")";
-                    $fieldCounter++;
-                    if ($fieldCounter != $this->getGlobalWhereClausesCount()) {
-                        $statement .= " AND ";
-                    }
-                }
-            }
-        }
-
-        if (sizeof($this->whereCustomClauses) > 0) {
-            foreach ($this->whereCustomClauses as $expression) {
-                $statement .= "($expression)";
-                $fieldCounter++;
-                if ($fieldCounter != $this->getGlobalWhereClausesCount()) {
-                    $statement .= " AND ";
-                }
-            }
-        }
+        $statement .= $this->whereClause->getSQL();
 
         if (sizeof($this->orderByClauses) > 0) {
             $fieldCounter = 0;
@@ -560,15 +375,11 @@ class SQLSelect {
                 }
                 $statement .= "`" . $field->getDatabase() . "`.`" . $field->getName() . "` $asc";
                 $fieldCounter++;
-                if ($fieldCounter != sizeof($this->orderByClauses)) {
-                    $statement .= ", ";
-                }
+                if ($fieldCounter != sizeof($this->orderByClauses)) $statement .= ", ";
             }
         }
 
-        if (!is_null($this->limit) AND !is_null($this->offset)) {
-            $statement .= " LIMIT " . $this->offset . ", " . $this->limit;
-        }
+        if (!is_null($this->limit) AND !is_null($this->offset)) $statement .= " LIMIT " . $this->offset . ", " . $this->limit;
 
         return $statement;
     }

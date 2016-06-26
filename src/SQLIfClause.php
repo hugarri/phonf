@@ -10,10 +10,13 @@ class SQLIfClause {
     private $falseClauseField;
     private $alias;
 
-    public function setConditionField($conditionField) {
+    public function setConditionField(Field $conditionField) {
         $this->conditionField = $conditionField;
     }
 
+    /**
+     * @return Field
+     */
     public function getConditionField() {
         return $this->conditionField;
     }
@@ -26,18 +29,30 @@ class SQLIfClause {
         return $this->condition;
     }
 
+    /**
+     * @param Field $falseClauseField
+     */
     public function setFalseClauseField($falseClauseField) {
         $this->falseClauseField = $falseClauseField;
     }
 
+    /**
+     * @return Field
+     */
     public function getFalseClauseField() {
         return $this->falseClauseField;
     }
 
+    /**
+     * @param Field $trueClauseField
+     */
     public function setTrueClauseField($trueClauseField) {
         $this->trueClauseField = $trueClauseField;
     }
 
+    /**
+     * @return Field
+     */
     public function getTrueClauseField() {
         return $this->trueClauseField;
     }

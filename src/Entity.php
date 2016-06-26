@@ -46,6 +46,10 @@ abstract class Entity {
         endif;
     }
 
+    /**
+     * @param $fieldName
+     * @return Field | null
+     */
     public function getField($fieldName) {
         if(array_key_exists($fieldName, $this->fields)) :
             return $this->fields[$fieldName];

@@ -6,14 +6,12 @@ class SQLDelete {
 
     private $connection;
     private $tableName;
-    private $whereClauseFields = array();
-    private $whereCustomClauses = array();
-    private $whereInFields = array();
-    private $whereIsNullClauseFields = array();
+    private $whereClause;
 
     function __construct(\mysqli $connection, $table = null) {
         $this->connection = $connection;
         $this->setTable($table);
+        $this->whereClause = new SQLWhereClause();
     }
 
     /**
@@ -27,11 +25,18 @@ class SQLDelete {
     }
 
     /**
+     * @param SQLWhereClause $whereClause
+     */
+    public function setWhereClause(SQLWhereClause $whereClause) {
+        $this->whereClause = $whereClause;
+    }
+
+    /**
      * @param Field $field
      * @return $this
      */
     public function addWhereClauseField(Field $field) {
-        $this->whereClauseFields[] = $field;
+        $this->whereClause->addWhereClauseField($field);
 
         return $this;
     }
@@ -41,7 +46,7 @@ class SQLDelete {
      * @return $this
      */
     public function addWhereInField(Field $field) {
-        $this->whereInFields[] = $field;
+        $this->whereClause->addWhereInField($field);
 
         return $this;
     }
@@ -51,7 +56,7 @@ class SQLDelete {
      * @return $this
      */
     public function addWhereCustomClause($clause) {
-        $this->whereCustomClauses[] = $clause;
+        $this->whereClause->addWhereCustomClause($clause);
 
         return $this;
     }
@@ -61,17 +66,9 @@ class SQLDelete {
      * @return $this
      */
     public function addWhereIsNullClauseField(Field $field) {
-        $this->whereIsNullClauseFields[] = $field;
+        $this->whereClause->addWhereIsNullClauseField($field);
 
         return $this;
-    }
-
-    public function getGlobalWhereClausesCount() {
-        return
-            sizeof($this->whereClauseFields) +
-            sizeof($this->whereCustomClauses) +
-            sizeof($this->whereInFields) +
-            sizeof($this->whereIsNullClauseFields);
     }
 
     /**
@@ -79,58 +76,7 @@ class SQLDelete {
      */
     public function getQuery() {
         $statement = "DELETE " . "FROM `" . $this->tableName . "`";
-
-        $fieldCounter = 0;
-        $statement .= " WHERE ";
-        if (sizeof($this->whereClauseFields) > 0) {
-            foreach ($this->whereClauseFields as $field) {
-                /** @var $field Field */
-                if ($field->getDBValue() === "null") {
-                    $statement .= "`" . $field->getDatabase() . "`.`" . $field->getName() . "` IS " . $field->getDBValue();
-                } else {
-                    $statement .= "`" . $field->getDatabase() . "`.`" . $field->getName() . "` = " . $field->getDBValue();
-                }
-                $fieldCounter++;
-                if ($fieldCounter != $this->getGlobalWhereClausesCount()) {
-                    $statement .= " AND ";
-                }
-            }
-        }
-        if (sizeof($this->whereCustomClauses) > 0) {
-            foreach ($this->whereCustomClauses as $expression) {
-                $statement .= "($expression)";
-                $fieldCounter++;
-                if ($fieldCounter != $this->getGlobalWhereClausesCount()) {
-                    $statement .= " AND ";
-                }
-            }
-        }
-        if (sizeof($this->whereInFields) > 0) {
-            foreach ($this->whereInFields as $field) {
-                if (is_array($field->getValue())) {
-                    $statement .= "`".$field->getDatabase()."`.`".$field->getName()."` IN (";
-                    $items = "";
-                    foreach ($field->getValue() as $item) {
-                        $items .= "'$item',";
-                    }
-                    $statement .= rtrim($items,",");
-                    $statement .= ")";
-                    $fieldCounter++;
-                    if ($fieldCounter != $this->getGlobalWhereClausesCount()) {
-                        $statement .= " AND ";
-                    }
-                }
-            }
-        }
-        if (sizeof($this->whereIsNullClauseFields) > 0) {
-            foreach ($this->whereIsNullClauseFields as $field) {
-                $statement .= "`" . $field->getDatabase() . "`.`" . $field->getName() . "` IS NULL";
-                $fieldCounter++;
-                if ($fieldCounter != $this->getGlobalWhereClausesCount()) {
-                    $statement .= " AND ";
-                }
-            }
-        }
+        $statement .= $this->whereClause->getSQL();
 
         return $statement;
     }
