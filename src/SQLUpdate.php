@@ -77,6 +77,15 @@ class SQLUpdate {
      */
     public function getQuery() {
         $statement = "UPDATE `" . $this->tableName . "` SET ";
+        $fieldCounter = 0;
+        foreach($this->fields as $field) {
+            /** @var Field $field */
+            $statement .= "`" . $field->getName() . "` = " . $field->getDBValue();
+            $fieldCounter++;
+            if ($fieldCounter != sizeof($this->fields)) {
+                $statement .= ", ";
+            }
+        }
         $statement .= $this->whereClause->getSQL();
 
         return $statement;
