@@ -25,7 +25,7 @@ abstract class Entity {
         return $this->getFieldValue($fieldName);
     }
 
-    protected function createField($fieldName, Field $field) {
+    public function createField($fieldName, Field $field) {
         $this->fields[$fieldName] = $field;
     }
 
