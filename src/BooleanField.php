@@ -6,7 +6,7 @@ class BooleanField extends Field {
 
     public function getDBValue() {
         if (!is_null($this->value)) {
-            if ($this->value == 0) {
+            if ($this->value === 0) {
                 $statement = "0";
             } else {
                 $statement = $this->value;
