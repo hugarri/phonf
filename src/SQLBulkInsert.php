@@ -48,7 +48,7 @@ class SQLBulkInsert {
             foreach($row as $field) {
                 /** @var Field $field */
                 $value = $field->getDBValue();
-                if (is_null($value) OR $value == "" OR $value == '""') $value = 'NULL';
+                if (is_null($value) OR $value === "" OR $value == '""') $value = 'NULL';
                 $rowsql .= "$value,";
             }
             $rowsql = rtrim($rowsql, ",");
