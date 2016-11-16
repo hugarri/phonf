@@ -49,7 +49,7 @@ class SQLInsert {
         foreach($this->fields as $field) {
             $name = $field->getName();
             $value = $field->getDBValue();
-            if (is_null($value) OR $value === "" OR $value == '""') $value = 'NULL';
+            if (is_null($value) OR $value === "" OR $value === '""') $value = 'NULL';
             $statement .= "`$name` = $value";
             $fieldCounter++;
             if ($fieldCounter != sizeof($this->fields)) {
