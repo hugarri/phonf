@@ -35,11 +35,11 @@ class SQLBulkInsert {
      * @return string
      */
     public function getQuery() {
-        $statement = "INSERT INTO `" . $this->tableName . "` ";
+        $statement = "INSERT INTO ` $this->tableName ` ";
         $fields = "";
         foreach($this->rows[0] as $field) {
             /** @var Field $field */
-            $fields .= $field->getName() . ",";
+            $fields .= "`" . $field->getName() . "`,";
         }
         $fields = rtrim($fields, ",");
         $statement .= "($fields) VALUES ";
