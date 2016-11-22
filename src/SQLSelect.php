@@ -388,6 +388,8 @@ class SQLSelect {
         $result = $this->connection->query($this->getQuery());
 
         $results = array();
+        if ($result == false) return $results;
+
         while ($row = $result->fetch_assoc()) {
             $results[] = $row;
         }
