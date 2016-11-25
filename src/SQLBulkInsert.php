@@ -61,17 +61,14 @@ class SQLBulkInsert {
 
     public function execute() {
         $statement = $this->connection->stmt_init();
-        $statement->prepare($this->getQuery());
 
-        $statement->execute();
+        if ($statement->prepare($this->getQuery())) $statement->execute();
 
         $error = $statement->errno;
 
-        if ($error == 0) {
-            $result = $this->connection->insert_id;
-        } else {
-            $result = -1;
-        }
+        if ($error == 0) $result = $this->connection->insert_id;
+        else $result = -1;
+
         $statement->close();
         $this->connection->close();
 

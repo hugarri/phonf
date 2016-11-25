@@ -62,9 +62,8 @@ class SQLInsert {
 
     public function execute() {
         $statement = $this->connection->stmt_init();
-        $statement->prepare($this->getQuery());
 
-        $statement->execute();
+        if ($statement->prepare($this->getQuery())) $statement->execute();
 
         $error = $statement->errno;
 

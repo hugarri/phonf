@@ -83,8 +83,9 @@ class SQLDelete {
 
     public function execute() {
         $statement = $this->connection->stmt_init();
-        $statement->prepare($this->getQuery());
-        $statement->execute();
+
+        if ($statement->prepare($this->getQuery())) $statement->execute();
+
         $error = $statement->errno;
         $statement->close();
         $this->connection->close();
