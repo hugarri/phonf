@@ -7,10 +7,15 @@ class SQLBulkInsert {
     private $connection;
     private $tableName;
     private $rows = array();
+    private $ignore = "";
 
     function __construct(\mysqli $connection, $table = null) {
         $this->connection = $connection;
         $this->setTable($table);
+    }
+
+    public function setInsertIgnore() {
+        $this->ignore = "IGNORE ";
     }
 
     /**
@@ -35,7 +40,7 @@ class SQLBulkInsert {
      * @return string
      */
     public function getQuery() {
-        $statement = "INSERT INTO `$this->tableName` ";
+        $statement = "INSERT " . $this->ignore . "INTO `$this->tableName` ";
         $fields = "";
         foreach($this->rows[0] as $field) {
             /** @var Field $field */

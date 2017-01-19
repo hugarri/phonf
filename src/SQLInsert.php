@@ -7,10 +7,15 @@ class SQLInsert {
     private $connection;
     private $tableName;
     private $fields = array();
+    private $ignore = "";
 
     function __construct(\mysqli $connection, $table = null) {
         $this->connection = $connection;
         $this->setTable($table);
+    }
+
+    public function setInsertIgnore() {
+        $this->ignore = "IGNORE ";
     }
 
     /**
@@ -43,7 +48,7 @@ class SQLInsert {
      * @return string
      */
     public function getQuery() {
-        $statement = "INSERT INTO `" . $this->tableName . "` SET ";
+        $statement = "INSERT " . $this->ignore . "INTO `$this->tableName` SET ";
 
         $fieldCounter = 0;
         foreach($this->fields as $field) {
