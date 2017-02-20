@@ -11,7 +11,8 @@ class SQLJoinClause {
     private $destinyFields = array();
     private $conditionFields = array();
     private $conditionValues = array();
-    private $onDistinctClauseFields = array();
+    private $onDistinctClauseOriginFields = array();
+    private $onDistinctClauseDestinyFields = array();
 
     function __construct($tableName = null, $tableAlias = null) {
         $this->setTable($tableName);
@@ -112,11 +113,13 @@ class SQLJoinClause {
     }
 
     /**
-     * @param Field $field
+     * @param Field $originField
+     * @param Field $destinyField
      * @return $this
      */
-    public function addOnDistinctClauseFields(Field $field) {
-        $this->onDistinctClauseFields[] = $field;
+    public function addOnDistinctClauseFields(Field $originField, $destinyField = null) {
+        $this->onDistinctClauseOriginFields[] = $originField;
+        $this->onDistinctClauseDestinyFields[] = $destinyField;
 
         return $this;
     }
@@ -125,19 +128,15 @@ class SQLJoinClause {
         return
             sizeof($this->originFields) +
             sizeof($this->conditionFields) +
-            sizeof($this->onDistinctClauseFields);
+            sizeof($this->onDistinctClauseOriginFields);
     }
 
     public function getQuery() {
-        if ($this->isLeftJoin) {
-            $statement = " LEFT JOIN ";
-        } else {
-            $statement = " JOIN ";
-        }
+        if ($this->isLeftJoin) $statement = " LEFT JOIN ";
+        else $statement = " JOIN ";
+
         $statement .= "`" . $this->tableName . "`";
-        if (!is_null($this->tableAlias)) {
-            $statement .= " `" . $this->tableAlias . "`";
-        }
+        if (!is_null($this->tableAlias)) $statement .= " `" . $this->tableAlias . "`";
         $statement .= " ON ";
 
         $fieldCounter = 0;
@@ -150,28 +149,32 @@ class SQLJoinClause {
             if ($fieldCounter != $this->getGlobalWhereClausesCount()) $statement .= " AND ";
         }
 
-        $fieldCounter = 0;
         for($i=0; $i<sizeof($this->conditionFields); $i++) {
             $field = $this->conditionFields[$i];
             $value = $this->conditionValues[$i];
             $statement .= "`" . $field->getDatabase() . "`.`" . $field->getName() . "` ";
-            if (!is_null($value)) {
-                $statement .= "= '$value'";
-            } else {
-                $statement .= "IS NULL";
-            }
+            if (!is_null($value)) $statement .= "= '$value'";
+            else $statement .= "IS NULL";
             $fieldCounter++;
             if ($fieldCounter != $this->getGlobalWhereClausesCount()) $statement .= " AND ";
         }
 
-        if (sizeof($this->onDistinctClauseFields) > 0) {
-            foreach ($this->onDistinctClauseFields as $field) {
-                /** @var $field Field */
-                if ($field->getDBValue() === "null") $statement .= "`" . $field->getDatabase() . "`.`" . $field->getName() . "` IS NOT " . $field->getDBValue();
-                else $statement .= "`" . $field->getDatabase() . "`.`" . $field->getName() . "` != " . $field->getDBValue();
-                $fieldCounter++;
-                if ($fieldCounter != $this->getGlobalWhereClausesCount()) $statement .= " AND ";
+        for($i=0; $i<sizeof($this->onDistinctClauseOriginFields); $i++) {
+            $originField = $this->onDistinctClauseOriginFields[$i];
+            $destinyField = $this->onDistinctClauseDestinyFields[$i];
+            /** @var $originField Field */
+            /** @var $destinyField Field */
+
+            $statement .= "`" . $originField->getDatabase() . "`.`" . $originField->getName() . "` ";
+            if (is_null($destinyField)) {
+                if ($originField->getDBValue() === "null") $statement .= "IS NOT " . $originField->getDBValue();
+                else $statement .= "!= " . $originField->getDBValue();
+            } else {
+                $statement .= "!= `" . $destinyField->getDatabase() . "`.`" . $destinyField->getName() . "`";
             }
+
+            $fieldCounter++;
+            if ($fieldCounter != $this->getGlobalWhereClausesCount()) $statement .= " AND ";
         }
 
         return $statement;
