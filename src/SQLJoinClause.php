@@ -115,7 +115,7 @@ class SQLJoinClause {
      * @param Field $field
      * @return $this
      */
-    public function addOnDistinctClauseField(Field $field) {
+    public function addOnDistinctClauseFields(Field $field) {
         $this->onDistinctClauseFields[] = $field;
 
         return $this;
