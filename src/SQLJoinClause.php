@@ -11,6 +11,7 @@ class SQLJoinClause {
     private $destinyFields = array();
     private $conditionFields = array();
     private $conditionValues = array();
+    private $onDistinctClauseFields = array();
 
     function __construct($tableName = null, $tableAlias = null) {
         $this->setTable($tableName);
@@ -110,6 +111,23 @@ class SQLJoinClause {
         return $this;
     }
 
+    /**
+     * @param Field $field
+     * @return $this
+     */
+    public function addOnDistinctClauseField(Field $field) {
+        $this->onDistinctClauseFields[] = $field;
+
+        return $this;
+    }
+
+    public function getGlobalWhereClausesCount() {
+        return
+            sizeof($this->originFields) +
+            sizeof($this->conditionFields) +
+            sizeof($this->onDistinctClauseFields);
+    }
+
     public function getQuery() {
         if ($this->isLeftJoin) {
             $statement = " LEFT JOIN ";
@@ -129,9 +147,7 @@ class SQLJoinClause {
             $statement .= "`" . $originField->getDatabase() . "`.`" . $originField->getName() . "` = `";
             $statement .= $destinyField->getDatabase() . "`.`" . $destinyField->getName() . "`";
             $fieldCounter++;
-            if (($fieldCounter != sizeof($this->originFields) AND $fieldCounter >= 1) OR (sizeof($this->conditionFields) > 0)) {
-                $statement .= " AND ";
-            }
+            if ($fieldCounter != $this->getGlobalWhereClausesCount()) $statement .= " AND ";
         }
 
         $fieldCounter = 0;
@@ -145,12 +161,20 @@ class SQLJoinClause {
                 $statement .= "IS NULL";
             }
             $fieldCounter++;
-            if ($fieldCounter != sizeof($this->conditionFields) AND $fieldCounter >= 1) {
-                $statement .= " AND ";
+            if ($fieldCounter != $this->getGlobalWhereClausesCount()) $statement .= " AND ";
+        }
+
+        if (sizeof($this->onDistinctClauseFields) > 0) {
+            foreach ($this->onDistinctClauseFields as $field) {
+                /** @var $field Field */
+                if ($field->getDBValue() === "null") $statement .= "`" . $field->getDatabase() . "`.`" . $field->getName() . "` IS NOT " . $field->getDBValue();
+                else $statement .= "`" . $field->getDatabase() . "`.`" . $field->getName() . "` != " . $field->getDBValue();
+                $fieldCounter++;
+                if ($fieldCounter != $this->getGlobalWhereClausesCount()) $statement .= " AND ";
             }
         }
 
         return $statement;
     }
 
-} 
+}
