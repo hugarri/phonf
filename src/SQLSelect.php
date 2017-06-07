@@ -23,6 +23,10 @@ class SQLSelect {
         $this->whereClause = new SQLWhereClause();
     }
 
+    function setConnection(\mysqli $connection) {
+        $this->connection = $connection;
+    }
+
     /**
      * @param string $tableName
      * @return $this
