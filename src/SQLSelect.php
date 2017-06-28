@@ -10,6 +10,7 @@ class SQLSelect {
     private $fields = array();
     private $ifClauses = array();
     private $countClauses = array();
+    private $avgClauses = array();
     private $joinClauses = array();
     private $whereClause;
     private $orderByClauses = array();
@@ -111,6 +112,26 @@ class SQLSelect {
      */
     public function addCountClauses($fieldsArray) {
         $this->countClauses = $fieldsArray;
+
+        return $this;
+    }
+
+    /**
+     * @param SQLAvgClause $SQLAvgClause
+     * @return $this
+     */
+    public function addAvgClause(SQLAvgClause $SQLAvgClause) {
+        $this->avgClauses[] = $SQLAvgClause;
+
+        return $this;
+    }
+
+    /**
+     * @param array $fieldsArray
+     * @return $this
+     */
+    public function addAvgClauses($fieldsArray) {
+        $this->avgClauses = $fieldsArray;
 
         return $this;
     }
@@ -331,7 +352,7 @@ class SQLSelect {
             /** @var $field Field */
             $statement .= "`" . $field->getDatabase() . "`.`" . $field->getName() . "` AS `" . $field->getDatabase() . $field->getName() . "`";
             $fieldCounter++;
-            if ($fieldCounter != (sizeof($this->fields) + sizeof($this->ifClauses) + sizeof($this->countClauses))) $statement .= ", ";
+            if ($fieldCounter != $this->getFieldsCounter()) $statement .= ", ";
         }
         foreach ($this->ifClauses as $ifClause) {
             /** @var $ifClause SQLIfClause */
@@ -346,7 +367,7 @@ class SQLSelect {
 
             $statement .= "IF ($condition, $trueClause, $falseClause) AS $alias";
             $fieldCounter++;
-            if ($fieldCounter != (sizeof($this->fields) + sizeof($this->ifClauses) + sizeof($this->countClauses))) $statement .= ", ";
+            if ($fieldCounter != $this->getFieldsCounter()) $statement .= ", ";
         }
         foreach ($this->countClauses as $countClause) {
             /** @var $countClause SQLCountClause */
@@ -354,7 +375,15 @@ class SQLSelect {
             $aliasField = $countClause->getAliasField();
             $statement .= "COUNT(DISTINCT `" . $field->getDatabase() . "`.`" . $field->getName() . "`) AS `" . $aliasField->getDatabase() . $aliasField->getName() . "`";
             $fieldCounter++;
-            if ($fieldCounter != (sizeof($this->fields) + sizeof($this->ifClauses) + sizeof($this->countClauses))) $statement .= ", ";
+            if ($fieldCounter != $this->getFieldsCounter()) $statement .= ", ";
+        }
+        foreach ($this->avgClauses as $avgClause) {
+            /** @var $avgClause SQLAvgClause */
+            $field = $avgClause->getField();
+            $aliasField = $avgClause->getAliasField();
+            $statement .= "AVG(`" . $field->getDatabase() . "`.`" . $field->getName() . "`) AS `" . $aliasField->getDatabase() . $aliasField->getName() . "`";
+            $fieldCounter++;
+            if ($fieldCounter != $this->getFieldsCounter()) $statement .= ", ";
         }
 
         $statement .= " FROM `" . $this->tableName . "`";
@@ -386,6 +415,10 @@ class SQLSelect {
         if (!is_null($this->limit) AND !is_null($this->offset)) $statement .= " LIMIT " . $this->offset . ", " . $this->limit;
 
         return $statement;
+    }
+
+    private function getFieldsCounter() {
+        return sizeof($this->fields) + sizeof($this->ifClauses) + sizeof($this->countClauses) + sizeof($this->avgClauses);
     }
 
     public function execute() {
