@@ -42,6 +42,9 @@ class SQLBulkInsert {
     public function getQuery() {
         $statement = "INSERT " . $this->ignore . "INTO `$this->tableName` ";
         $fields = "";
+
+        if (empty($this->rows)) return null;
+
         foreach($this->rows[0] as $field) {
             /** @var Field $field */
             $fields .= "`" . $field->getName() . "`,";
@@ -67,7 +70,11 @@ class SQLBulkInsert {
     public function execute() {
         $statement = $this->connection->stmt_init();
 
-        if ($statement->prepare($this->getQuery())) $statement->execute();
+        $query = $this->getQuery();
+
+        if (empty($query)) return null;
+
+        if ($statement->prepare($query)) $statement->execute();
 
         $error = $statement->errno;
 
