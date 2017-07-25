@@ -93,9 +93,14 @@ class SQLUpdate {
 
     public function execute() {
         $statement = $this->connection->stmt_init();
-        if ($statement->prepare($this->getQuery())) $statement->execute();
+        $ok = false;
+        if ($statement->prepare($this->getQuery())) {
+            if ($statement->execute()) {
+                $ok = true;
+            }
+        }
         $error = $statement->errno;
-        $statement->close();
+        if ($ok) $statement->close();
         $this->connection->close();
 
         return $error;
