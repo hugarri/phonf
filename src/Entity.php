@@ -58,19 +58,17 @@ abstract class Entity {
         return null;
     }
 
-    public function getFields() {
-        $aux = array();
+    public function getFields($fieldNames = null) {
+        $fields = array();
         foreach ($this->fields as $id => $field) :
-            /** @var Field $field */
-            $key = $field->getDatabase() . "$id";
-            $aux[$key] = $field;
+            if (empty($fieldNames) or in_array($id, $fieldNames)) {
+                /** @var Field $field */
+                $key = $field->getDatabase()."$id";
+                $fields[$key] = $field;
+            }
         endforeach;
 
-        return $aux;
-    }
-
-    public function getEssentialFields() {
-        return $this->getFields();
+        return $fields;
     }
 
     public function getFieldValue($fieldName) {
