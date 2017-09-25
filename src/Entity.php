@@ -79,6 +79,12 @@ abstract class Entity {
         return null;
     }
 
+    public function entity($entityName, $value = null) {
+        if (!is_null($value)) $this->createEntity($entityName, $value);
+
+        return $this->getEntity($entityName);
+    }
+
     public function createEntity($entityName, Entity $entity) {
         $this->entities[$entityName] = $entity;
     }
@@ -92,6 +98,12 @@ abstract class Entity {
             return $this->entities[$entityName];
         }
         return null;
+    }
+
+    public function collection($collectionName, $value = null) {
+        if (!is_null($value)) $this->createCollection($collectionName, $value);
+
+        return $this->getCollection($collectionName);
     }
 
     public function createCollection($collectionName, $collection) {
