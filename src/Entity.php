@@ -89,6 +89,10 @@ abstract class Entity {
         $this->entities[$entityName] = $entity;
     }
 
+    public function removeEntity($entityName) {
+        unset($this->entities[$entityName]);
+    }
+
     /**
      * @param $entityName
      * @return Entity|null
@@ -108,6 +112,10 @@ abstract class Entity {
 
     public function createCollection($collectionName, $collection) {
         $this->collections[$collectionName] = $collection;
+    }
+
+    public function removeCollection($collectionName) {
+        unset($this->collections[$collectionName]);
     }
 
     public function getCollection($collectionName) {
