@@ -29,6 +29,10 @@ abstract class Entity {
         $this->fields[$fieldName] = $field;
     }
 
+    public function removeField($fieldName) {
+        unset($this->fields[$fieldName]);
+    }
+
     public function setFieldValue($fieldName, $value, $queryResult = false) {
         if($queryResult) :
             $tableAlias = array_values($this->fields)[0]->getDatabase();
