@@ -36,6 +36,20 @@ class SQLUpdate {
     }
 
     /**
+     * @param Field[] $fields
+     * @return $this
+     */
+    public function addFields($fields) {
+        if (!empty($fields)) {
+            foreach ($fields as $field) {
+                $this->addField($field);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
      * @param SQLWhereClause $whereClause
      */
     public function setWhereClause(SQLWhereClause $whereClause) {
